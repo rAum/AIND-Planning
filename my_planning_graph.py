@@ -3,6 +3,7 @@ from aimacode.search import Problem
 from aimacode.utils import expr
 from lp_utils import decode_state
 
+from itertools import product
 
 class PgNode():
     """Base class for planning graph nodes.
@@ -404,7 +405,8 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
-        incosistent_present = (True for e1 in node_a1.effnodes if (e1.symbol, e1.is_pos) in ((e2.symbol, not e2.is_pos) for e2 in node_a2.effnodes))
+        incosistent_present = (True for e1 in node_a1.effnodes if
+                               (e1.symbol, e1.is_pos) in ((e2.symbol, not e2.is_pos) for e2 in node_a2.effnodes))
         return any(incosistent_present)
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -422,7 +424,12 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Interference between nodes
-        return False
+        pos_interference = (True for e1 in node_a1.action.effect_add if e1 in node_a2.action.precond_neg)
+        neg_interference = (True for e1 in node_a1.action.effect_rem if e1 in node_a2.action.precond_pos)
+        pos_interference2 = (True for e1 in node_a2.action.effect_add if e1 in node_a1.action.precond_neg)
+        neg_interference2 = (True for e1 in node_a2.action.effect_rem if e1 in node_a1.action.precond_pos)
+        return any(pos_interference) or any(neg_interference) or any(pos_interference2) or any(neg_interference2)
+
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
@@ -434,9 +441,9 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
-
         # TODO test for Competing Needs between nodes
-        return False
+        return any((True for prea1 in node_a1.parents
+                    if any((True for prea2 in node_a2.parents if prea1.is_mutex(prea2)))))
 
     def update_s_mutex(self, nodeset: set):
         """ Determine and update sibling mutual exclusion for S-level nodes
@@ -471,7 +478,7 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for negation between nodes
-        return False
+        return node_s1.is_pos != node_s2.is_pos and node_s1.symbol == node_s2.symbol
 
     def inconsistent_support_mutex(self, node_s1: PgNode_s, node_s2: PgNode_s):
         """
@@ -490,7 +497,7 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Support between nodes
-        return False
+        return all(pre_s1.is_mutex(pre_s2) for (pre_s1, pre_s2) in product(node_s1.parents, node_s2.parents))
 
     def h_levelsum(self) -> int:
         """The sum of the level costs of the individual goals (admissible if goals independent)
@@ -498,6 +505,12 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
-        # TODO implement
-        # for each goal in the problem, determine the level cost, then add them together
+        # For each goal in the problem, determine their level cost, then add them together
+
+        goals = [PgNode_s(goal, goal.op != '~') for goal in self.problem.goal]
+        for goal in goals:
+            for level, state in enumerate(self.s_levels):
+                if goal in state:
+                    level_sum += level
+                    break
         return level_sum
