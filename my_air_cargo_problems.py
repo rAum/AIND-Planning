@@ -174,8 +174,8 @@ class AirCargoProblem(Problem):
         already_added = action.effect_add + action.effect_rem
         # transfer data from old state to new state
         old_state = decode_state(state, self.state_map)
-        new_state.pos = action.effect_add + [fluent for fluent in old_state.pos if fluent not in already_added]
-        new_state.neg = action.effect_rem + [fluent for fluent in old_state.neg if fluent not in already_added]
+        new_state.pos = action.effect_add + [f for f in old_state.pos if fluent not in already_added]
+        new_state.neg = action.effect_rem + [f for f in old_state.neg if fluent not in already_added]
 
         return encode_state(new_state, self.state_map)
 
