@@ -222,6 +222,7 @@ class PlanningGraph():
         self.all_actions = self.problem.actions_list + self.noop_actions(self.problem.state_map)
         self.s_levels = []
         self.a_levels = []
+        self.goals = [PgNode_s(goal, goal.op != '~') for goal in self.problem.goal]
         self.create_graph()
 
     def noop_actions(self, literal_list):
@@ -506,9 +507,7 @@ class PlanningGraph():
         """
         level_sum = 0
         # For each goal in the problem, determine their level cost, then add them together
-
-        goals = [PgNode_s(goal, goal.op != '~') for goal in self.problem.goal]
-        for goal in goals:
+        for goal in self.goals:
             for level, state in enumerate(self.s_levels):
                 if goal in state:
                     level_sum += level
