@@ -131,7 +131,6 @@ class AirCargoProblem(Problem):
             return flys
 
         all = load_actions() + unload_actions() + fly_actions()
-
         return all
 
     def actions(self, state: str) -> list:
@@ -170,15 +169,20 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         # start with setting the new_state to what directly happens as an effect of an action
-        new_state = FluentState(action.effect_add, action.effect_rem)
-
-        already_added = set(action.effect_add) | set(action.effect_rem)
-
-        # transfer data from old state to new state that should be just rewritten
+        new_state = FluentState([], [])
         old_state = decode_state(state, self.state_map)
-        new_state.pos += [fluent for fluent in old_state.pos if fluent not in already_added]
-        new_state.neg += [fluent for fluent in old_state.neg if fluent not in already_added]
-
+        for fluent in old_state.pos:
+            if fluent not in action.effect_rem:
+                new_state.pos.append(fluent)
+        for fluent in action.effect_add:
+            if fluent not in new_state.pos:
+                new_state.pos.append(fluent)
+        for fluent in old_state.neg:
+            if fluent not in action.effect_add:
+                new_state.neg.append(fluent)
+        for fluent in action.effect_rem:
+            if fluent not in new_state.neg:
+                new_state.neg.append(fluent)
         return encode_state(new_state, self.state_map)
 
     def goal_test(self, state: str) -> bool:
