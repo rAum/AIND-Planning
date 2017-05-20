@@ -404,7 +404,8 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
-        return False
+        incosistent_present = (True for e1 in node_a1.effnodes if (e1.symbol, e1.is_pos) in ((e2.symbol, not e2.is_pos) for e2 in node_a2.effnodes))
+        return any(incosistent_present)
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
