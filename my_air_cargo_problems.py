@@ -130,8 +130,7 @@ class AirCargoProblem(Problem):
                             flys.append(fly)
             return flys
 
-        all = load_actions() + unload_actions() + fly_actions()
-        return all
+        return load_actions() + unload_actions() + fly_actions()
 
     def actions(self, state: str) -> list:
         """ Return the actions that can be executed in the given state.
