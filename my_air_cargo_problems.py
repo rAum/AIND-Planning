@@ -70,19 +70,12 @@ class AirCargoProblem(Problem):
             list of Action objects
         """
 
-        # TODO create concrete Action objects based on the domain action schema for: Load, Unload, and Fly
-        # concrete actions definition: specific literal action that does not include variables as with the schema
-        # for example, the action schema 'Load(c, p, a)' can represent the concrete actions 'Load(C1, P1, SFO)'
-        # or 'Load(C2, P2, JFK)'.  The actions for the planning problem must be concrete because the problems in
-        # forward search and Planning Graphs must use Propositional Logic
-
         def load_actions():
             """Create all concrete Load actions and return a list
 
             :return: list of Action objects
             """
             loads = []
-            # TODO create all load ground actions from the domain Load action
             for (airport, plane, cargo) in product(self.airports, self.planes, self.cargos):
                 precond_pos = [expr_at(plane, airport),
                                expr_at(cargo, airport)]
@@ -99,7 +92,6 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             unloads = []
-            # TODO create all Unload ground actions from the domain Unload action
             for (airport, plane, cargo) in product(self.airports, self.planes, self.cargos):
                 precond_pos = [expr_at(plane, airport),
                                expr_in(cargo, plane)]
@@ -140,7 +132,6 @@ class AirCargoProblem(Problem):
             e.g. 'FTTTFF'
         :return: list of Action objects
         """
-        # TODO implement
         possible_actions = []
         kb = PropKB()
         kb.tell(decode_state(state, self.state_map).pos_sentence())
@@ -166,10 +157,8 @@ class AirCargoProblem(Problem):
         :param action: Action applied
         :return: resulting state after action
         """
-        # TODO implement
-        # start with setting the new_state to what directly happens as an effect of an action
         old_state = decode_state(state, self.state_map)
-        already_added = action.effect_add + action.effect_rem
+        already_added = set(action.effect_add + action.effect_rem)
         new_state = FluentState(
             action.effect_add + [f for f in old_state.pos if f not in already_added],
             action.effect_rem + [f for f in old_state.neg if f not in already_added])
@@ -213,8 +202,7 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         """
-        # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
-        # basing on https://discussions.udacity.com/t/understanding-ignore-precondition-heuristic/225906/2
+        # based on https://discussions.udacity.com/t/understanding-ignore-precondition-heuristic/225906/2
         kb = PropKB()
         kb.tell(decode_state(node.state, self.state_map).pos_sentence())
 
@@ -248,7 +236,6 @@ def air_cargo_p1() -> AirCargoProblem:
 
 
 def air_cargo_p2() -> AirCargoProblem:
-    # TODO implement Problem 2 definition
     cargos = ['C1', 'C2', 'C3']
     planes = ['P1', 'P2', 'P3']
     airports = ['JFK', 'SFO', 'ATL']
@@ -266,7 +253,6 @@ def air_cargo_p2() -> AirCargoProblem:
 
 
 def air_cargo_p3() -> AirCargoProblem:
-    # TODO implement Problem 3 definition
     cargos = ['C1', 'C2', 'C3', 'C4']
     planes = ['P1', 'P2']
     airports = ['JFK', 'SFO', 'ATL', 'ORD']
